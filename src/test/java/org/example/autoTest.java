@@ -18,5 +18,5 @@ import static io.cucumber.core.options.Constants.PLUGIN_PROPERTY_NAME;
         @ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "io.qameta.allure.cucumber7jvm.AllureCucumber7Jvm, pretty")
 })
 
-public class AutoTest {
+public class autoTest {
 }
