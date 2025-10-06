@@ -12,6 +12,8 @@ import java.net.URI;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
 
 public class connection {
     protected static WebDriver driver;
@@ -30,10 +32,17 @@ public class connection {
 
              */
             DesiredCapabilities capabilities = new DesiredCapabilities();
-            capabilities.setBrowserName("chrome");
-            capabilities.setVersion("latest");
+            Map<String, Object> selenoidOptions = new HashMap<>();
+            selenoidOptions.put("browserName", "chrome");
+            selenoidOptions.put("browserVersion", "109.0");
+            selenoidOptions.put("enableVNC", true);
+            selenoidOptions.put("enableVideo", false);
+            capabilities.setCapability("selenoid:options", selenoidOptions);
             try {
-                driver = new RemoteWebDriver(URI.create("https://selenoid-hub.applineselenoid.fvds.ru/wd/hub/").toURL(), capabilities);
+                driver = new RemoteWebDriver(
+                        URI.create("http://applineselenoid.fvds.ru:4444/wd/hub/").toURL(),
+                        capabilities
+                );
             }
             catch (MalformedURLException e){
                 throw new RuntimeException(e);
