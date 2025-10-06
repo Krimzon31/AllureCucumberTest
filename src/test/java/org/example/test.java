@@ -11,13 +11,28 @@ import org.openqa.selenium.support.ui.Select;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static org.example.connection.driver;
-import static org.example.connection.statement;
+import static org.example.Connection.driver;
+import static org.example.Connection.statement;
 
-public class test {
+public class Test {
     int beginId;
 
+    //поиск последнего добавленного объекта
     String querySelectLastId = "SELECT MAX(FOOD_ID) AS MAXID FROM FOOD";
+
+    //для проверки создания таблицы
+    boolean tableExist = false;
+
+    //создание тестовой таблицы для удаления
+    String queryCreateTable = "CREATE TABLE test_table (\n" +
+            "    id INT\n" +
+            ");";
+
+    //поиск тестовой таблицы
+    String queryCheckTable = "SELECT COUNT(*) AS cnt\n" +
+            "FROM INFORMATION_SCHEMA.TABLES\n" +
+            "WHERE TABLE_SCHEMA = 'PUBLIC'\n" +
+            "  AND TABLE_NAME = 'test_table';\n";
 
     @И("получение идентификатора последнего добавленного товара")
     @Description("Получает идентификатор последнего добавленного товара из таблицы FOOD")
@@ -33,6 +48,7 @@ public class test {
         WebElement dialog = driver.findElement(By.id("editModal"));
 
         if (!dialog.isDisplayed()) {
+            // если не отображается -> нажимаем кнопку "Добавить"
             buttonAdd();
         }
     }
@@ -47,9 +63,11 @@ public class test {
         WebElement selectElement = driver.findElement(By.xpath("//select[@id='type']"));
         Select select = new Select(selectElement);
 
+        //вводим название
         inputName.clear();
         inputName.sendKeys(name);
 
+        //проверяем что чек бокс не отмечен
         if (exotic) {
             if (!checkBoxExotic.isSelected()) {
                 checkBoxExotic.click();
@@ -60,6 +78,7 @@ public class test {
                 checkBoxExotic.click();
             }
         }
+        //выбираем тип
         select.selectByVisibleText(type);
     }
 
@@ -86,6 +105,7 @@ public class test {
         Assert.assertEquals(beginId, getLastId());
     }
 
+    //метод для возврата номера последнего найденного элемента
     public int getLastId(){
         int id = 0;
 
@@ -101,6 +121,7 @@ public class test {
         }
     }
 
+    //метод для ожидания
     public void sleep(int timeOfSleep){
         try {
             Thread.sleep(timeOfSleep);
