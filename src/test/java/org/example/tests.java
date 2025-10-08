@@ -1,120 +1,312 @@
 package org.example;
 
 import io.cucumber.java.ru.И;
+import io.cucumber.java.ru.Дано;
+import io.cucumber.java.ru.То;
 import io.qameta.allure.Description;
 import io.qameta.allure.Owner;
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.Select;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.List;
+import java.util.Random;
 
 import static org.example.connection.driver;
-import static org.example.connection.statement;
 
 public class tests {
-    int beginId;
-    String querySelectLastId = "SELECT MAX(FOOD_ID) AS MAXID FROM FOOD";
+    private String registrationPageUrl = "http://217.74.37.176/?route=account/register&language=ru-ru";
+    private String logoutUrl = "http://217.74.37.176/?route=account/logout&language=ru-ru";
+    private Random random = new Random();
 
-    @И("получение идентификатора последнего добавленного товара")
-    @Description("Получает идентификатор последнего добавленного товара из таблицы FOOD")
-    @Owner("Leonardo DiCaprio")
-    public void получение_идентификатора_последнего_добавленного_товара() {
-        beginId = getLastId();
+    @Дано("пользователь находится на странице регистрации")
+    @Description("Открывает страницу регистрации")
+    @Owner("Admin")
+    public void пользователь_находится_на_странице_регистрации() {
+        driver.get(registrationPageUrl);
+        sleep(1000);
+        // Проверяем, что мы на правильной странице
+        Assert.assertTrue("Должны быть на странице регистрации",
+                driver.getCurrentUrl().contains("register") ||
+                        driver.findElements(By.xpath("//h1[contains(text(),'Регистрация')]")).size() > 0);
     }
 
-    @И("проверка открыта ли форма добавления")
-    @Description("Проверяет, открыта ли форма добавления товара, и открывает её при необходимости")
-    @Owner("Natalie Portman")
-    public void проверка_открыта_ли_форма_добавления() {
-        WebElement dialog = driver.findElement(By.id("editModal"));
-
-        if (!dialog.isDisplayed()) {
-            // если не отображается -> нажимаем кнопку "Добавить"
-            buttonAdd();
-        }
-    }
-
-    @И("поля Название Экзотический Тип заполняются данными {string}, {string}, {string}")
-    @Description("Заполняет поля Название, Экзотический и Тип данными из сценария")
+    @И("заполняются поля регистрации случайным email")
+    @Description("Заполняет поля формы регистрации со случайным email")
     @Owner("Tom Hanks")
-    public void поля_название_экзотический_тип_заполняются_данными(String name, String isExotic, String type) {
-        boolean exotic = Boolean.parseBoolean(isExotic);
-        WebElement inputName = driver.findElement(By.xpath("//input[@placeholder='Наименование']"));
-        WebElement checkBoxExotic = driver.findElement(By.xpath("//input[@name='exotic']"));
-        WebElement selectElement = driver.findElement(By.xpath("//select[@id='type']"));
-        Select select = new Select(selectElement);
+    public void заполняются_поля_регистрации_случайным_email() {
+        String randomEmail = generateRandomEmail();
+        String firstName = "Иван";
+        String lastName = "Петров";
+        String password = "password123";
 
-        inputName.clear();
-        inputName.sendKeys(name);
+        WebElement inputFirstName = driver.findElement(By.xpath("//input[@name='firstname']"));
+        WebElement inputLastName = driver.findElement(By.xpath("//input[@name='lastname']"));
+        WebElement inputEmail = driver.findElement(By.xpath("//input[@name='email']"));
+        WebElement inputPassword = driver.findElement(By.xpath("//input[@name='password']"));
 
+        inputFirstName.clear();
+        inputFirstName.sendKeys(firstName);
 
-        if (exotic) {
-            if (!checkBoxExotic.isSelected()) {
-                checkBoxExotic.click();
-            }
-        }
-        else {
-            if (checkBoxExotic.isSelected()) {
-                checkBoxExotic.click();
-            }
-        }
-        select.selectByVisibleText(type);
+        inputLastName.clear();
+        inputLastName.sendKeys(lastName);
+
+        inputEmail.clear();
+        inputEmail.sendKeys(randomEmail);
+
+        inputPassword.clear();
+        inputPassword.sendKeys(password);
+
+        System.out.println("Использован случайный email: " + randomEmail);
     }
 
-    @И("нажимается кнопка Сохранить")
-    @Description("Нажимает кнопку Сохранить в форме добавления товара")
+    @И("выход из профиля и возврат на страницу регистрации")
+    @Description("Выходит из профиля и возвращается на страницу регистрации")
+    @Owner("Admin")
+    public void выход_из_профиля_и_возврат_на_страницу_регистрации() {
+        driver.get(logoutUrl);
+        sleep(1000);
+
+        // После выхода возвращаемся на страницу регистрации
+        driver.get(registrationPageUrl);
+        sleep(1000);
+        System.out.println("Вернулись на страницу регистрации");
+    }
+
+    @И("принимаются условия политики конфиденциальности")
+    @Description("Активирует чекбокс согласия с политикой конфиденциальности")
+    @Owner("Natalie Portman")
+    public void принимаются_условия_политики_конфиденциальности() {
+        WebElement privacyCheckbox = driver.findElement(By.xpath("//input[@name='agree']"));
+        if (!privacyCheckbox.isSelected()) {
+            privacyCheckbox.click();
+        }
+    }
+
+    @И("нажимается кнопка Продолжить")
+    @Description("Нажимает кнопку Продолжить для завершения регистрации")
     @Owner("Scarlett Johansson")
-    public void нажимается_кнопка_Сохранить() {
-        WebElement buttonSave = driver.findElement(By.xpath("//button[text()='Сохранить']"));
-        buttonSave.click();
-        sleep(500);
+    public void нажимается_кнопка_Продолжить() {
+        WebElement continueButton = driver.findElement(By.xpath("//button[contains(text(),'Продолжить')] | //input[@type='submit']"));
+        continueButton.click();
+        sleep(2000);
     }
 
-    @И("проверка разости идентификаторов после теста")
-    @Description("Проверяет, что идентификатор последнего элемента изменился после добавления нового товара")
+    @То("проверка успешной регистрации по переходу на другую страницу")
+    @Description("Проверяет успешную регистрацию по переходу на другую страницу")
     @Owner("Brad Pitt")
-    public void проверка_разности_идентификаторов_после_теста(){
-        Assert.assertNotEquals(beginId, getLastId());
+    public void проверка_успешной_регистрации_по_переходу_на_другую_страницу() {
+        String currentUrl = driver.getCurrentUrl();
+        System.out.println("Текущий URL после регистрации: " + currentUrl);
+
+        // Проверяем, что произошел переход с страницы регистрации
+        Assert.assertFalse("Должен быть переход на другую страницу",
+                currentUrl.contains("register"));
+
+        // Проверяем, что мы не остались на странице регистрации
+        Assert.assertFalse("Не должны остаться на странице регистрации",
+                currentUrl.equals(registrationPageUrl));
+
+        System.out.println("Регистрация успешна - произошел переход на: " + currentUrl);
     }
 
-    @И("проверка эквивалентности идентификаторов последних элементов до после теста")
-    @Description("Проверяет, что идентификатор последнего элемента не изменился после операции")
+    @То("проверка что остались на странице регистрации")
+    @Description("Проверяет, что остались на странице регистрации при ошибке")
     @Owner("Meryl Streep")
-    public void проверка_эквивалентности_идентификаторов_последних_элементов_до_после_теста(){
-        Assert.assertEquals(beginId, getLastId());
+    public void проверка_что_остались_на_странице_регистрации() {
+        String currentUrl = driver.getCurrentUrl();
+        System.out.println("Текущий URL: " + currentUrl);
+
+        // Проверяем, что остались на странице регистрации или вернулись на нее
+        boolean isOnRegistrationPage = currentUrl.contains("register") ||
+                driver.findElements(By.xpath("//h1[contains(text(),'Регистрация')]")).size() > 0;
+
+        Assert.assertTrue("Должны остаться на странице регистрации при ошибке", isOnRegistrationPage);
+        System.out.println("Остались на странице регистрации - ошибка обработана корректно");
     }
 
-    //метод для возврата номера последнего найденного элемента
-    public int getLastId(){
-        int id = 0;
+    @То("проверка ошибки валидации поля {string}")
+    @Description("Проверяет отображение ошибки валидации для конкретного поля")
+    @Owner("Robert Downey Jr.")
+    public void проверка_ошибки_валидации_поля(String fieldName) {
+        try {
+            String errorId = "";
+            String expectedText = "";
 
-        try (ResultSet resultSet = statement.executeQuery(querySelectLastId)) {
-            if (resultSet.next()) {
-                id = resultSet.getInt("MAXID");
+            switch (fieldName) {
+                case "Имя":
+                    errorId = "error-firstname";
+                    expectedText = "Имя должно быть от 1 до 32 символов!";
+                    break;
+                case "Фамилия":
+                    errorId = "error-lastname";
+                    expectedText = "Фамилия должна быть от 1 до 32 символов!";
+                    break;
+                case "E-Mail":
+                    errorId = "error-email";
+                    expectedText = "E-Mail введен неправильно!";
+                    break;
+                case "Пароль":
+                    errorId = "error-password";
+                    expectedText = "В пароле должно быть от 4 до 20 символов!";
+                    break;
             }
-            return id;
 
-        } catch (SQLException sqlExc) {
-            System.err.println("Не удалось получить данные о последнем ID: " + sqlExc.getMessage());
-            return id;
+            WebElement fieldError = driver.findElement(By.id(errorId));
+            Assert.assertTrue("Должна отображаться ошибка для поля " + fieldName, fieldError.isDisplayed());
+            String actualText = fieldError.getText();
+            Assert.assertTrue("Текст ошибки должен содержать: " + expectedText + ", а получили: " + actualText,
+                    actualText.contains(expectedText));
+            System.out.println("Ошибка валидации для поля " + fieldName + ": " + actualText);
+
+        } catch (Exception e) {
+            Assert.fail("Не найдена ошибка валидации для поля: " + fieldName + ". " + e.getMessage());
         }
     }
 
-    //метод для ожидания
-    public void sleep(int timeOfSleep){
+    @То("проверка ошибки политики конфиденциальности")
+    @Description("Проверяет отображение ошибки о необходимости принятия политики конфиденциальности")
+    @Owner("Chris Evans")
+    public void проверка_ошибки_политики_конфиденциальности() {
+        try {
+            // Ищем alert toast сообщение
+            WebElement alertError = driver.findElement(By.xpath(
+                    "//div[contains(@class,'alert-danger')]//*[contains(text(),'Privacy Policy')] | " +
+                            "//div[contains(@class,'alert-danger')]//*[contains(text(),'политикой')] | " +
+                            "//*[contains(text(),'Privacy Policy')] | " +
+                            "//*[contains(text(),'политикой')]"
+            ));
+            Assert.assertTrue("Должна отображаться ошибка политики конфиденциальности", alertError.isDisplayed());
+            System.out.println("Обнаружена ошибка политики конфиденциальности: " + alertError.getText());
+
+        } catch (Exception e) {
+            // Если не нашли конкретное сообщение, ищем любой alert
+            try {
+                WebElement alertContainer = driver.findElement(By.xpath("//div[contains(@class,'alert-danger')]"));
+                Assert.assertTrue("Должен отображаться alert об ошибке", alertContainer.isDisplayed());
+                System.out.println("Обнаружен alert об ошибке: " + alertContainer.getText());
+            } catch (Exception ex) {
+                Assert.fail("Не найдена ошибка политики конфиденциальности");
+            }
+        }
+    }
+
+    @То("проверка ошибки существующего email")
+    @Description("Проверяет отображение ошибки о уже существующем email")
+    @Owner("Chris Hemsworth")
+    public void проверка_ошибки_существующего_email() {
+        try {
+            // Ищем сообщение о существующем email
+            WebElement emailError = driver.findElement(By.xpath(
+                    "//div[contains(@class,'alert-danger')]//*[contains(text(),'уже')] | " +
+                            "//div[contains(@class,'alert-danger')]//*[contains(text(),'существует')] | " +
+                            "//div[contains(@class,'alert-danger')]//*[contains(text(),'already')] | " +
+                            "//*[contains(text(),'E-Mail уже зарегистрирован')]"
+            ));
+            Assert.assertTrue("Должна отображаться ошибка существующего email", emailError.isDisplayed());
+            System.out.println("Обнаружена ошибка существующего email: " + emailError.getText());
+
+        } catch (Exception e) {
+            // Если не нашли конкретное сообщение, проверяем общую ошибку email
+            проверка_ошибки_валидации_поля("E-Mail");
+        }
+    }
+    @И("поле {string} заполняется значением {string}")
+    @Description("Заполняет конкретное поле указанным значением")
+    @Owner("Mark Ruffalo")
+    public void поле_заполняется_значением(String fieldName, String value) {
+        WebElement field = null;
+
+        switch (fieldName) {
+            case "Имя":
+                field = driver.findElement(By.xpath("//input[@name='firstname']"));
+                break;
+            case "Фамилия":
+                field = driver.findElement(By.xpath("//input[@name='lastname']"));
+                break;
+            case "E-Mail":
+                field = driver.findElement(By.xpath("//input[@name='email']"));
+                break;
+            case "Пароль":
+                field = driver.findElement(By.xpath("//input[@name='password']"));
+                break;
+        }
+
+        if (field != null) {
+            field.clear();
+            if (!value.equals("пусто")) {
+                field.sendKeys(value);
+            }
+        }
+    }
+
+    @И("заполняются поля регистрации данными {string}, {string}, {string}, {string}")
+    @Description("Заполняет поля формы регистрации")
+    @Owner("Tom Hanks")
+    public void заполняются_поля_регистрации_данными(String firstName, String lastName, String email, String password) {
+        WebElement inputFirstName = driver.findElement(By.xpath("//input[@name='firstname']"));
+        WebElement inputLastName = driver.findElement(By.xpath("//input[@name='lastname']"));
+        WebElement inputEmail = driver.findElement(By.xpath("//input[@name='email']"));
+        WebElement inputPassword = driver.findElement(By.xpath("//input[@name='password']"));
+
+        inputFirstName.clear();
+        inputFirstName.sendKeys(firstName);
+
+        inputLastName.clear();
+        inputLastName.sendKeys(lastName);
+
+        inputEmail.clear();
+        inputEmail.sendKeys(email);
+
+        inputPassword.clear();
+        inputPassword.sendKeys(password);
+    }
+
+    @И("чекбокс политики конфиденциальности не активирован")
+    @Description("Оставляет чекбокс политики конфиденциальности неактивным")
+    @Owner("Jeremy Renner")
+    public void чекбокс_политики_конфиденциальности_не_активирован() {
+        WebElement privacyCheckbox = driver.findElement(By.xpath("//input[@name='agree']"));
+        if (privacyCheckbox.isSelected()) {
+            privacyCheckbox.click();
+        }
+    }
+
+    @И("все поля остаются пустыми")
+    @Description("Оставляет все поля формы пустыми")
+    @Owner("Paul Rudd")
+    public void все_поля_остаются_пустыми() {
+        // Очищаем все поля
+        driver.findElement(By.xpath("//input[@name='firstname']")).clear();
+        driver.findElement(By.xpath("//input[@name='lastname']")).clear();
+        driver.findElement(By.xpath("//input[@name='email']")).clear();
+        driver.findElement(By.xpath("//input[@name='password']")).clear();
+        System.out.println("Все поля очищены");
+    }
+
+    // Метод для генерации случайного email
+    private String generateRandomEmail() {
+        String[] domains = {"gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "mail.ru", "yandex.ru"};
+        String chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder username = new StringBuilder();
+
+        // Генерируем случайное имя пользователя длиной 8-12 символов
+        int usernameLength = 8 + random.nextInt(5);
+        for (int i = 0; i < usernameLength; i++) {
+            username.append(chars.charAt(random.nextInt(chars.length())));
+        }
+
+        // Выбираем случайный домен
+        String domain = domains[random.nextInt(domains.length)];
+
+        return username.toString() + "@" + domain;
+    }
+
+    public void sleep(int timeOfSleep) {
         try {
             Thread.sleep(timeOfSleep);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    }
-
-    public void buttonAdd(){
-        WebElement buttonAdd = driver.findElement(By.xpath("//button[text()='Добавить']"));
-        buttonAdd.click();
-        sleep(500);
     }
 }

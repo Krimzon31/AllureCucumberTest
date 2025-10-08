@@ -3,34 +3,22 @@ package org.example;
 import io.cucumber.java.AfterAll;
 import io.cucumber.java.BeforeAll;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
 public class connection {
     protected static WebDriver driver;
-    private static String baseAddress = "http://localhost:8080/food";
-    protected static java.sql.Connection connection;
-    protected static Statement statement;
+    private static String baseAddrsess = "http://217.74.37.176/?route=account/register&language=ru-ru";
 
     @BeforeAll
     public static void setUp() {
-
-        try{
-            /*System.setProperty("webdriver.chrome.driver",
-                    "AllureCucumberTest\\src\\test\\resources\\chromedriver.exe");
-
-            driver = new ChromeDriver(); // присваиваем полю класса
-
-             */
+        try {
+            // Настройка Selenium WebDriver
             DesiredCapabilities capabilities = new DesiredCapabilities();
             Map<String, Object> selenoidOptions = new HashMap<>();
             selenoidOptions.put("browserName", "chrome");
@@ -38,51 +26,31 @@ public class connection {
             selenoidOptions.put("enableVNC", true);
             selenoidOptions.put("enableVideo", false);
             capabilities.setCapability("selenoid:options", selenoidOptions);
+
             try {
                 driver = new RemoteWebDriver(
                         URI.create("http://applineselenoid.fvds.ru:4444/wd/hub/").toURL(),
                         capabilities
                 );
-            }
-            catch (MalformedURLException e){
+            } catch (MalformedURLException e) {
                 throw new RuntimeException(e);
             }
 
-            driver.get(baseAddress);
+            driver.get(baseAddrsess);
+            System.out.println("WebDriver инициализирован, открыта страница: " + baseAddrsess);
 
-
-            connection = DriverManager.getConnection(
-                    "jdbc:h2:tcp://localhost:9092/mem:testdb",
-                    "user",
-                    "pass");
-
-            statement = connection.createStatement();
-
-            System.out.println("Подключение к базе установлено");
-        }
-        catch (SQLException sqlExc){
-            System.err.println("Не удалось установить подключение к базе данных: " + sqlExc.getMessage());
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             System.err.println("Ошибка при инициализации теста: " + e.getMessage());
+            e.printStackTrace();
         }
     }
+
     @AfterAll
     public static void tearDown() {
+        // Закрытие WebDriver
         if (driver != null) {
             driver.quit();
-        }
-
-
-        if (connection != null) {
-            try {
-                if (!connection.isClosed()) {
-                    connection.close();
-                    System.out.println("Подключение к базе закрыто");
-                }
-            } catch (SQLException sqlExc) {
-                System.err.println("Ошибка при закрытии подключения к базе: " + sqlExc.getMessage());
-            }
+            System.out.println("WebDriver закрыт");
         }
     }
 }
