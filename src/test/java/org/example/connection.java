@@ -14,6 +14,7 @@ import java.util.Map;
 public class connection {
     protected static WebDriver driver;
     private static String baseAddrsess = "http://217.74.37.176/?route=account/register&language=ru-ru";
+    private static final testPropManager props = testPropManager.getTestPropManager();
 
     @BeforeAll
     public static void setUp() {
@@ -21,8 +22,8 @@ public class connection {
             // Настройка Selenium WebDriver
             DesiredCapabilities capabilities = new DesiredCapabilities();
             Map<String, Object> selenoidOptions = new HashMap<>();
-            selenoidOptions.put("browserName", "chrome");
-            selenoidOptions.put("browserVersion", "109.0");
+            selenoidOptions.put("browserName", props.getProperty("type.browser"));
+            selenoidOptions.put("browserVersion", "latest");
             selenoidOptions.put("enableVNC", true);
             selenoidOptions.put("enableVideo", false);
             capabilities.setCapability("selenoid:options", selenoidOptions);
