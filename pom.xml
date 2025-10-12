@@ -106,7 +106,7 @@
                 <version>3.1.2</version>
                 <configuration>
                     <testFailureIgnore>true</testFailureIgnore>
-                    <includes> **/RunnerTest.java</includes>
+                    <includes> **/autoTest.java</includes>
                     <!--suppress UnresolvedMavenProperty -->
                     <argLine>
                         -Xmx1024m
@@ -114,7 +114,7 @@
                         -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/1.9.20/aspectjweaver-1.9.20.jar"
                     </argLine>
                     <systemPropertyVariables>
-                        <allure.results.directory>${project.build.directory}/reports/allure-results</allure.results.directory>
+                        <allure.results.directory>${project.build.directory}/target/reports/allure-results</allure.results.directory>
                         <junit.jupiter.extensions.autodetection.enabled>true</junit.jupiter.extensions.autodetection.enabled>
                     </systemPropertyVariables>
                 </configuration>
@@ -126,8 +126,8 @@
                 <version>2.12.0</version>
                 <configuration>
                     <reportVersion>2.24.0</reportVersion>
-                    <resultsDirectory>${project.build.directory}/reports/allure-results</resultsDirectory>
-                    <reportDirectory>${project.build.directory}/ceports/allure-reports</reportDirectory>
+                    <resultsDirectory>${project.build.directory}/target/reports/allure-results</resultsDirectory>
+                    <reportDirectory>${project.build.directory}/target/reports/allure-results</reportDirectory>
                 </configuration>
             </plugin>
         </plugins>
