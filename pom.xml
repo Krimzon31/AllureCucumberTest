@@ -106,7 +106,7 @@
                 <version>3.1.2</version>
                 <configuration>
                     <testFailureIgnore>true</testFailureIgnore>
-                    <includes> **/RunnerTest.java</includes>
+                    <includes> **/autoTest.java</includes>
                     <!--suppress UnresolvedMavenProperty -->
                     <argLine>
                         -Xmx1024m
