@@ -107,19 +107,20 @@
                 <version>3.1.2</version>
                 <configuration>
                     <testFailureIgnore>true</testFailureIgnore>
-                    <includes>**/autoTest.java</includes>
-                    <!--suppress UnresolvedMavenProperty -->
                     <argLine>
-                        -Xmx1024m
-                        -Dfile.encoding=${encoding.type}
                         -javaagent:"${settings.localRepository}/org/aspectj/aspectjweaver/1.9.20/aspectjweaver-1.9.20.jar"
                     </argLine>
                     <systemProperties>
                         <property>
                             <name>allure.results.directory</name>
-                            <value>${project.build.directory}/../allure-results</value>
+                            <value>${project.build.directory}/allure-results</value>
                         </property>
                     </systemProperties>
+                    <properties>
+                        <configurationParameters>
+                            cucumber.junit-platform.naming-strategy=long
+                        </configurationParameters>
+                    </properties>
                 </configuration>
             </plugin>
 
